@@ -1,25 +1,46 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import React, { useState } from "react";
+import { API } from "./api";
 
-function App() {
+const { fetchDriver, fetchRecentTripsForRider } = API;
+
+const App = () => {
+  const [inputValue, setInputValue] = useState("TEST");
+  const [drivers, setDrivers] = useState([]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const driverInfo = [];
+    const recentTrips = await fetchRecentTripsForRider(inputValue);
+    await recentTrips.forEach(async (driver) => {
+      driverInfo.push(await fetchDriver(driver.driverUUID));
+    });
+
+    setDrivers(driverInfo);
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <br />
+      <form id="form" onSubmit={handleSubmit}>
+        <label>
+          Rider UUID:
+          <input
+            type="text"
+            id="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+          />
+        </label>
+        <input type="submit" value="Fetch driver emails" />
+        <div id="results">
+          {drivers.map((driver, i) => {
+            return <li key={i}>{driver.email}</li>;
+          })}
+        </div>
+      </form>
     </div>
   );
-}
+};
 
 export default App;
